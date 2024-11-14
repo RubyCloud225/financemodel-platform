@@ -1,46 +1,45 @@
 #include <iostream>
 #include "ProfitLossCalculator.h"
+#include "balancesheet.h"
+#include "dataprocessing.h"
 #include "crow_all.h" // include crow and will need to install dependencies
 
 int main() {
     const std::string apiUrl = "https://api.example.com/data"; // Replace with platform API URL
+    // fetching data from various endpoints
+    json accountingstandards = fetchAccountingStandards(apiUrl);
+    json nominaltypes = fetchNominalTypes(apiUrl);
+    json nominalaccounts = fetchNominalAccounts(apiUrl);
+    json salesinvoices = fetchSalesInvoices(apiUrl);
+    json purchaseinvoices = fetchPurchaseInvoices(apiUrl);
+    json bankreciepts = fetchBankReciepts(apiUrl);
+    json bankpayments = fetchBankPayments(apiUrl);
+    json journals = fetchJournals(apiUrl);
+
+    // Output the fetched data
+    std::cout << "Accounting Standards:" << accountingstandards.dump(4) << std::endl;
+    std::cout << "Nominal Type:" << nominaltypes.dump(4) << std::endl;
+    std::cout << "Nominal Accounts: " << nominalAccounts.dump(4) << std::endl;
+    std::cout << "Sales Invoices: " << salesInvoices.dump(4) << std::endl;
+    std::cout << "Purchase Invoices: " << purchaseInvoices.dump(4) << std::endl;
+    std::cout << "Bank Receipts: " << bankReceipts.dump(4) << std::endl;
+    std::cout << "Bank Payments: " << bankPayments.dump(4) << std::endl;
+    std::cout << "Journals: " << journals.dump(4) << std::endl;
+
+    crow::FinanceModelPlatform; // Create a Crow Application
+
+    // Call the function to create the balance sheet API
+    createBalanceSheet(app);
+
+    //calculate the profit and loss
     ProfitLossCalculator plc(apiUrl);
-    
+
     // Fetch data once at startup
     plc.fetchData();
 
-    crow::FinanceModelPlatform app; // Create a Crow Application
-
-    // Define an API endpint for Profit/loss calculation
-    CROW_ROUTE(app, "/calculate_profit_loss")
-    .methods("GET" _method)([](const crow::request& req) {
-        std::string filterDate = req.url_params.get("date");
-        std::string filterAccountingStandard = req.url_params.get("AccountingStandard");
-        std::string filterNominals = req.url_params.get("Nominals");
-
-        if (!filterDate || !filterAccountingStandard || !filterNominals) {
-            return crow::response(400, "Missing date or type parameter");
-        }
-
-        // create an instance of profit loss calculator
-        const std::string apiUrl = "https://api.example.com/data"; //replace with platform api
-        ProfitLossCalculator plc(apiUrl);
-        plc.fetchData(); // fetch data from api
-
-        double profitLoss = plc.calculateProfitLoss(filterDate, filterAccountingStandard, filterNominals);
-
-        // create a json response
-        json responseJson;
-        responseJson['date'] = filterDate;
-        responseJson['accountingstandard'] = filterAccountingStandard;
-        responseJson['nominals'] = filterNominals;
-
-        return crow::response{responsejson.dump()};
-    });
-
     // start server on port 18080
     app.post(18080).multithreaded().run();
-    
+
     return 0;
 
 }
