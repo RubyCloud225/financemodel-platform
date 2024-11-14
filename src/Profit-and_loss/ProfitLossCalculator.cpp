@@ -2,6 +2,7 @@
 #include <curl/curl.h>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <string>
 
 using json = nlohmann::json;
 
