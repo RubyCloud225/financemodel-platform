@@ -1,66 +1,50 @@
 #include "ProfitLossCalculator.h"
-#include <curl/curl.h>
-#include <iostream>
-#include <nlohmann/json.hpp>
-#include <string>
+#include <algorithm>
 
-using json = nlohmann::json;
+// Sample data representing profit and loss accounts for different accounting standards
+std::unordered_map<std::string, ProfitLossAccount> profitLossAccounts = {
+    {"USGAAP", {500000, 300000, 100000, 20000, 50000}},
+    {"UKGAAP", {480000, 290000, 110000, 25000, 45000}},
+    {"IFRS", {520000, 310000, 120000, 30000, 60000}}
+};
 
-ProfitLossCalculator::ProfitLossCalculator(const std::string& apiUrl)
-    : apiUrl(apiUrl) {}
+// Function to create the profit and loss API
+void createProfitLossAPI(crow::SimpleApp& app) {
+    // Define the API endpoint for fetching profit and loss data
+    CROW_ROUTE(app, "/api/profit-loss/<string>/<string>")([&](const crow::request& req, std::string accountingStandard, std::string date) {
+        // Convert accounting standard to uppercase for case-insensitivity
+        std::transform(accountingStandard.begin(), accountingStandard.end(), accountingStandard.begin(), ::toupper);
 
-size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
-    ((std::string*)userp)->append((char*)contents, size * nmemb);
-    return size * nmemb;
+        // Check if the accounting standard is valid
+        auto it = profitLossAccounts.find(accountingStandard);
+        if (it != profitLossAccounts.end()) {
+            ProfitLossAccount account = it->second;
+
+            // Calculate Gross Profit, Operating Profit, and Net Profit
+            double grossProfit = account.revenue - account.cost_of_goods_sold;
+            double operatingProfit = grossProfit - account.operating_expenses;
+            double netProfit = operatingProfit - account.interest_expense - account.taxes;
+
+            // Create a JSON response
+            return crow::json::wvalue{
+                {"accounting_standard", accountingStandard},
+                {"date", date},
+                {"profit_loss", {
+                    {"revenue", account.revenue},
+                    {"cost_of_goods_sold", account.cost_of_goods_sold},
+                    {"gross_profit", grossProfit},
+                    {"operating_expenses", account.operating_expenses},
+                    {"operating_profit", operatingProfit},
+                    {"interest_expense", account.interest_expense},
+                    {"taxes", account.taxes},
+                    {"net_profit", netProfit}
+                }}
+            };
+        } else {
+            return crow::response(404, crow::json::wvalue{
+                {"error", "Accounting standard not found"}
+            });
+        }
+    });
 }
 
-// fetching and parsing the data
-
-void ProfitLossCalculator::fetchData() {
-    CURL* curl;
-    CURLcode res;
-    std::string readBuffer;
-
-    curl = curl_easy_init();
-    if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, apiUrl.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-        res = curl_easy_perform(curl);
-
-        if (res != CURLE_OK) {
-            std::cerr << "curl_easy_perform() failed:" << curl_easy_strerror(res) << std::endl;
-            return;
-        }
-
-        // Parse JSON data
-        try {
-            auto jsonData = json::parse(readBuffer);
-
-            // Assume jsonData is an array of nominal data
-            for (const auto& item : jsonData) {
-                NominalData nominal;
-                nominal.date = item["date"];
-                nominal.accountingstandards = item["accountingstandards"];
-                nominal.Nominals = item["Nominals"];
-                nominal.amount = item["amount"];
-                nominalDataList.push_back(nominal);
-            }
-        } catch (const json::parse_error& e) {
-            std::cerr << "JSON parse error: " << e.what() << std::endl;
-        }
-    }
-}
-
-double ProfitLossCalculator::calculateProfitLoss(const std::string& filterdate, const std::string& filteraccountingstandard, const std::string& filternominal) {
-    double totalAmount = 0.0;
-
-    for (const auto& nominal :nominalDataList) {
-        // filter by date, standard and nominal
-        if (nominal.date == filterdate && nominal.accountingstandards == filteraccountingstandard && nominal.Nominals == filternominal) {
-            totalAmount += nominal.amount;
-        }
-    }
-
-    return totalAmount;
-}

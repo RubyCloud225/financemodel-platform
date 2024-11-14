@@ -2,7 +2,7 @@
 #include "ProfitLossCalculator.h"
 #include "balancesheet.h"
 #include "dataprocessing.h"
-#include "crow_all.h" // include crow and will need to install dependencies
+#include "crow.h" // include crow and will need to install dependencies
 
 int main() {
     const std::string apiUrl = "https://api.example.com/data"; // Replace with platform API URL
@@ -32,14 +32,9 @@ int main() {
     createBalanceSheet(app);
 
     //calculate the profit and loss
-    ProfitLossCalculator plc(apiUrl);
-
-    // Fetch data once at startup
-    plc.fetchData();
+    createProfitLossAPI(app);
 
     // start server on port 18080
     app.post(18080).multithreaded().run();
-
-    return 0;
 
 }

@@ -1,24 +1,9 @@
-#include <iostream>
-#include <string>
 #include "balancesheet.h"
-#include <unordered_map>
 #include <algorithm>
-#include "crow.h"
 
 using namespace financemodel;
 
-// Structure to hold nominal accounts per accounting standard
-struct NominalAccount {
-    double fixed_assets;
-    double inventory;
-    double debtors;
-    double creditors;
-    double cash_in_bank;
-    double share_capital;
-    double equity;
-};
-
-// sample representation 
+// sample representation
 unordered_map<string, NominalAccount> balanceSheets = {
     {"USGAAP", {100000, 50000, 30000, 20000, 25000, 150000, 50000}},
     {"UKGAAP", {95000, 52000, 28000, 22000, 30000, 140000, 60000}},

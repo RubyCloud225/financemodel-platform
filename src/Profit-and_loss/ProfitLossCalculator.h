@@ -1,23 +1,20 @@
-#include <vector>
-#ifndef PROFIT_LOSS_CALCULATOR_H
-#define PROFIT_LOSS_CALCULATOR_H
+#ifndef PROFIT_LOSS_H
+#define PROFIT_LOSS_H
 
-struct NominalData {
-    std::string date;
-    std::string accountingstandards; // UKGAAP, USGAAP, IFRS
-    std::string Nominals;
-    double amount;
+#include "crow_all.h"
+#include <unordered_map>
+#include <string>
 
+// Structure to hold profit and loss accounts per accounting standard
+struct ProfitLossAccount {
+    double revenue;
+    double cost_of_goods_sold;
+    double operating_expenses;
+    double interest_expense;
+    double taxes;
 };
 
-class ProfitLossCalculator {
-    public:
-        ProfitLossCalculator(const std::string& apiUrl);
-        double calculateProfitLoss(const std::string& filterdate, const std::string& filteraccountingstandards, const std::string& filterNominals);
-        void fetchData();
-    private:
-        std::string apiUrl;
-        std::vector<NominalData> nominalDataList;
-};
+// Function to create the profit and loss API
+void createProfitLossAPI(crow::SimpleApp& app);
 
-#endif //PROFIT_LOSS_CALCULATOR_H
+#endif // PROFIT_LOSS_H
