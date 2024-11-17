@@ -2,7 +2,12 @@
 #include "ProfitLossCalculator.h"
 #include "balancesheet.h"
 #include "dataprocessing.h"
+#include "nominal_ledger.h"
 #include "crow.h" // include crow and will need to install dependencies
+
+using namespace web;
+using namespace web::html;
+using namespace web::http::client;
 
 int main() {
     const std::string apiUrl = "https://api.example.com/data"; // Replace with platform API URL
