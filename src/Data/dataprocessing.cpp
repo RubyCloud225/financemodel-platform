@@ -43,6 +43,30 @@ json fetchDataFromAPI(const std::string& apiUrl) {
     }
 }
 
+void fetchDatesFromAPI(std::string& startDate, std::string& endDate) {
+    CURL* curl;
+    CURLcode res;
+    std::string readBuffer;
+
+    curl = curl_easy_init();
+    if(curl) {
+        curl_easy_setopt(curl, CURLOPT_URL, "https://api.example.com/dates");
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
+        res = curl_easy_perform(curl);
+        curl_easy_cleanup(curl);
+
+        if(res == CURLE_OK) {
+            // Parse the JSON response
+            auto jsonResponse = nlohmann::json::parse(readBuffer);
+            startDate = jsonResponse["startDate"];
+            endDate = jsonResponse["endDate"];
+        } else {
+            std::cerr << "Error fetching data: " << curl_easy_strerror(res) << std::endl;
+        }
+    }
+}
+
 json fetchAccountingStandards(const std::string& apiUrl) {
     return fetchDataFromAPI(apiUrl + "/accountingstandards");
 }

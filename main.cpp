@@ -10,6 +10,13 @@ using namespace web::html;
 using namespace web::http::client;
 
 int main() {
+    // Fetch dates from the API
+    fetchDatesFromAPI(startDate, endDate);
+
+    // Output the fetched dates
+    std::cout << "Start Date: " << startDate << std::endl;
+    std::cout << "End Date: " << endDate << std::endl;
+
     const std::string apiUrl = "https://api.example.com/data"; // Replace with platform API URL
     // fetching data from various endpoints
     json accountingstandards = fetchAccountingStandards(apiUrl);
@@ -38,8 +45,8 @@ int main() {
         std::vector<NominalAccount> nominalaccounts = fetchNominalAccounts(apiUrl);
 
         // date range
-        std::string startDate = "2023-01-01"; // Replace with your desired start date
-        std::string endDate = "2023-12-31";   // Replace with your desired end date
+        std::string startDate// Replace with your desired start date
+        std::string endDate  // Replace with your desired end date
 
         // Compute subtotals
         json subtotals = computeSubtotals(nominalaccounts, startDate, endDate);
@@ -52,7 +59,6 @@ int main() {
             jsonNominalAccount[U("category")] = json::value::string(nominalaccount.category);
             jsonNominalAccount[U("amount")] = json::value::number(nominalaccount.amount);
             jsonNominalAccount[U("type")] = nominalaccount.type == NominalAccountType::Credit ? U("Credit") : U("Debit");
-
             response[U("NominalAccounts")].as_array().push_back(jsonNominalAccount);
         }
 
