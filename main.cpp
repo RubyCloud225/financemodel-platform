@@ -33,6 +33,36 @@ int main() {
 
     crow::FinanceModelPlatform; // Create a Crow Application
 
+    // Nominal Ledger endpoint
+    CROW_ROUTE(app, "/nominalaccounts")([] {
+        std::vector<NominalAccount> nominalaccounts = fetchNominalAccounts(apiUrl);
+
+        // date range
+        std::string startDate = "2023-01-01"; // Replace with your desired start date
+        std::string endDate = "2023-12-31";   // Replace with your desired end date
+
+        // Compute subtotals
+        json subtotals = computeSubtotals(nominalaccounts, startDate, endDate);
+
+        // Prepare the response
+        json response;
+        response[U("NominalAccounts")] = json::array();
+        for (const auto& nominalaccount : nominalAccounts) {
+            json jsonNominalAccount;
+            jsonNominalAccount[U("category")] = json::value::string(nominalaccount.category);
+            jsonNominalAccount[U("amount")] = json::value::number(nominalaccount.amount);
+            jsonNominalAccount[U("type")] = nominalaccount.type == NominalAccountType::Credit ? U("Credit") : U("Debit");
+
+            response[U("NominalAccounts")].as_array().push_back(jsonNominalAccount);
+        }
+
+        // Add subtotals to the response
+        response[U("subtotals")] = subtotals;
+
+        // Return the response as JSON
+        return response;
+    });
+
     // Call the function to create the balance sheet API
     createBalanceSheet(app);
 

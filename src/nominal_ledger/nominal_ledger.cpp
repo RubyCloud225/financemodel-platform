@@ -4,9 +4,24 @@ void computeSubtotals(const std::vector<NominalAccount>& nominalaccount, const s
     std::map<std::string, double> creditSubtotals;
     std::map<std::string, double> debitSubtotals;
 
-    // Filter Transactions by the given date
-    if (transaction.date >= startDate && transaction.date <= endDate) {
-        //Filter transaction by date range
-        if (NominalAccounts)
+    for (const auto& nominalaccount : nominalaccounts) {
+        // Filter Nominal account by date range
+        if (nominalaccount.date >= startDate && nominalaccount.date <= endDate) {
+            if (nominalaccount.type == NominalAccountType::Credit) {
+                creditSubtotals[nominalaccount.account] += nominalaccount.amount;
+            } else {
+                debitSubtotals[nominalaccount.account] += nominalaccount.amount;
+            }
+        }
     }
+
+    json result = json::object();
+    for (const auto& pair : creditSubtotals) {
+        result[U(pair.first + " Credit")] = json::value::number(pair.second);
+    }
+    for (const auto& pair : debitSubtotals) {
+        result[U(pair.first + " Debit")] = json::value::number(pair.second);
+    }
+
+    return result;
 }
