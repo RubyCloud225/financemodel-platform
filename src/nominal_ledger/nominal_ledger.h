@@ -9,19 +9,19 @@
 #include <iomanip>
 
 // Define an enum for Transaction Type
-enum class TransactionType {
+enum class NominalAccountType {
     Credit,
     Debit
 }
 
-struct Transaction {
+struct NominalAccount {
     std::string date; // Format: YYYY-MM-DD
     std::string nominal; // Nominal Catagory
     double amount; // positive for debit, negative for credit
-    TransactionType type; // Transaction type (Credit or Debit)
+    NominalAccountType type; // Transaction type (Credit or Debit)
 };
 
 // Function to split transactions by nominal and compute subtotals
-void computeSubtotals(const std::vector<Transaction>& transactions, const std::string& givenDate);
+void computeSubtotals(const std::vector<NominalAmount>& nominalAccount, const std::string& givenDate);
 
 #endif // NOMINAL_LEDGER_H

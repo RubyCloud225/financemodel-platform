@@ -27,9 +27,9 @@ json fetchDataFromAPI(const std::string& apiUrl) {
     // parse the json response
     return json::parse(readBuffer);
     for(const auto& item : jsonResponse.as_array()) {
-        Transaction transaction;
-        transaction.date = item.at(U("date")).as_string();
-        transaction.nominal = item.at(U("nominal")).as_string();
+        NominalAccount nominalAccount;
+        nominalAccount.date = item.at(U("date")).as_string();
+        nominalAvvount.nominal = item.at(U("nominal")).as_string();
         transaction.amount = item.at(U("amount")).as_double();
 
         // Determin if the transaction is a debit or credit
